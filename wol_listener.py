@@ -11,7 +11,11 @@ args = parser.parse_args()
 def wol_listener(port=9):
     host = ""
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind((host, port))
+        try:
+            s.bind((host, port))
+        except PermissionError:
+            print("Please run as elevated user")
+            return
         print(f"Listening for Wake-on-LAN packets on port {port}:")
         while True:
             magic_packet = s.recv(1024).hex()
@@ -24,9 +28,9 @@ if args.port:
     try:
         wol_listener(args.port[0])
     except KeyboardInterrupt:
-        pass
+        print("Stopped listening")
 else:
     try:
         wol_listener()
     except KeyboardInterrupt:
-        pass
+        print("Stopped listening")
